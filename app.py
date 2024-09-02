@@ -14,6 +14,12 @@ app.config['ALLOWED_EXTENSIONS'] = {'csv'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def read_csv_in_chunks(file, chunk_size=10000):
+    chunks = []
+    for chunk in pd.read_csv(file, chunksize=chunk_size):
+        chunks.append(chunk)
+    return pd.concat(chunks)
+
 def runModel(X_train, y_train, X_test, y_test, num_columns):
     output = []
 
@@ -43,11 +49,11 @@ def runModel(X_train, y_train, X_test, y_test, num_columns):
         optimizer = optimizer_class()
 
         model = Sequential()
-        model.add(Dense(units=16, activation='relu', input_shape=(num_columns,)))
+        model.add(Dense(units=8, activation='relu', input_shape=(num_columns,)))
         model.add(Dense(1, activation='sigmoid'))
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=["accuracy"])
 
-        model.fit(X_train, y_train, epochs=100, verbose=0)
+        model.fit(X_train, y_train, epochs=100, batch_size=16, verbose=0)
         train_loss, train_accuracy = model.evaluate(X_train, y_train, verbose=0)
 
         if train_accuracy > best_train_accuracy:
