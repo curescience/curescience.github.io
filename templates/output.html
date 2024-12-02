@@ -9,23 +9,51 @@
         body {
             font-family: 'Barlow', sans-serif;
             margin: 20px;
+            text-align: center;
         }
         table {
-            width: 100%;
+            width: 80%;
+            margin: 20px auto;
             border-collapse: collapse;
-            margin: 20px 0;
         }
         table, th, td {
-            border: 1px solid black;
+            border: 1px solid #333;
+        }
+        th, td {
             padding: 10px;
             text-align: center;
         }
-        h1, h2, h3 {
-            text-align: center;
+        th {
+            background-color: #f4f4f4;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
         }
     </style>
 </head>
 <body>
-    {{ output|safe }}
+
+    <h1>Model Results</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Optimizer</th>
+                <th>Training Accuracy</th>
+                <th>Download Model</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.optimizer }}</td>
+                <td>{{ result.accuracy }}</td>
+                <td><a href="{{ url_for('download_model', optimizer_name=result.optimizer) }}">Download</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </body>
 </html>

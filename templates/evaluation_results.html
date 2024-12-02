@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Evaluation Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Barlow', sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #333;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Model Evaluation Results</h1>
+    
+    <!-- Display Test Accuracy -->
+    <h2>Test Accuracy: {{ accuracy }}</h2>
+    
+    <!-- Classification Report Table -->
+    <h3>Classification Report</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Label</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1 Score</th>
+                <th>Support</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in classification_report %}
+            <tr>
+                <td>{{ entry.label }}</td>
+                <td>{{ entry.precision }}</td>
+                <td>{{ entry.recall }}</td>
+                <td>{{ entry.f1_score }}</td>
+                <td>{{ entry.support }}</td>
+            </tr>
+            {% endfor %}
+            {% if weighted_avg %}
+            <tr>
+                <td><strong>Weighted Avg</strong></td>
+                <td>{{ weighted_avg.precision }}</td>
+                <td>{{ weighted_avg.recall }}</td>
+                <td>{{ weighted_avg.f1_score }}</td>
+                <td>{{ weighted_avg.support }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    <!-- Confusion Matrix Table -->
+    <h3>Detailed Classification Results</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>True Label</th>
+                <th>Predicted Label</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in confusion_matrix %}
+            <tr>
+                <td>{{ entry.index }}</td>
+                <td>{{ entry.true_label }}</td>
+                <td>{{ entry.predicted_label }}</td>
+                <td>{{ entry.result }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
