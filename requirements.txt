@@ -4,3 +4,4 @@ numpy==1.25.0
 scikit-learn==1.2.2
 tensorflow==2.14.0
 gunicorn==21.2.0
+rdkit==2024.03.3
