@@ -1210,7 +1210,7 @@
     <h2>Train a New Model</h2>
     <br>
     <form action="/tensorflow" method="POST" enctype="multipart/form-data">
-        <label for="train_file">Upload CSV file for training: </label><input type="file" id="train_file" name="train_file" accept=".csv" required>
+        <label for="train_file">Upload Training Dataset (.csv file): </label><input type="file" id="train_file" name="train_file" accept=".csv" required>
         <br>
         <input type="submit" value="Train Model">
     </form>
@@ -1231,7 +1231,10 @@
         <label for="model_file">Upload Saved Model (.keras file):</label>
         <input type="file" id="model_file" name="model_file" accept=".keras" required>
         <br>
-        <label for="test_file">Upload CSV file for testing:</label>
+        <label for="training_file_v2">Upload Initial Training Dataset (.csv file):</label>
+        <input type="file" id="model_file" name="training_file_v2" accept=".csv" required>
+        <br>
+        <label for="test_file">Upload Testing Dataset (.csv file):</label>
         <input type="file" id="test_file" name="test_file" accept=".csv" required>
         <br>
         <input type="submit" value="Evaluate Model">
@@ -1242,7 +1245,7 @@
     <h2>Upload a File and Return CNS_MPO Descriptors</h2>
     <br>
     <form action="/generate" method="POST" enctype="multipart/form-data">
-        <label for="smiles_file">Upload CSV file of SMILES (.csv file):</label>
+        <label for="smiles_file">Upload SMILES File (.csv file):</label>
         <input type="file" id="smiles_file" name="smiles_file" accept=".csv" required="">
         <br>
         <input type="submit" value="Generate Descriptors">
