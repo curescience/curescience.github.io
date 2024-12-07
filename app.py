@@ -36,6 +36,15 @@ def validate_csv_data(df):
         print(f"Error validating CSV data: {e}")
         return False
 
+def detect_duplicate_columns(columns):
+    seen = set()
+    duplicates = set()
+    for col in columns:
+        if col in seen:
+            duplicates.add(col)
+        seen.add(col)
+    return duplicates
+
 # Home route - redirect to the training route
 @app.route('/')
 def home():
@@ -123,23 +132,39 @@ def download_model(optimizer_name):
 @app.route('/evaluate', methods=['POST'])
 def evaluate():
     model_file = request.files['model_file']
+    training_file_v2 = request.files['training_file_v2']
     test_file = request.files['test_file']
     
-    test_error = None
-    if model_file and test_file:
+    if model_file and training_file_v2 and test_file:
         try:
             # Load model
             model_path = 'temp_model.keras'
             model_file.save(model_path)
             model = load_model(model_path)
             
-            # Load test data
+            # Load and clean training data column names
+            train_data = pd.read_csv(training_file_v2)
+            training_columns_v2 = [col.strip().lower() for col in train_data.columns.tolist()]
+            
+            # Load and clean test data column names
             test_data = pd.read_csv(test_file)
+            test_data.columns = [col.strip().lower() for col in test_data.columns]
+            duplicate_test_columns = detect_duplicate_columns(test_data.columns)
+            if duplicate_test_columns:
+                return render_template('index.html', error=f"Invalid data: Testing dataset contains duplicate columns: {duplicate_test_columns}.")
+
+            # Validate and rearrange test data columns
+            if not all(col in test_data.columns for col in training_columns_v2):
+                missing_columns = [col for col in training_columns_v2 if col not in test_data.columns]
+                return render_template('index.html', error=f"Invalid data: Testing dataset is missing columns {missing_columns}.")
+            
+            test_data = test_data[training_columns_v2]
             
             # Validate CSV data
             if not validate_csv_data(test_data):
                 return render_template('index.html', error="Invalid data: Testing dataset must contain only numerical values.")
-
+            
+            # Extract X and y from the test dataset
             X_test = test_data.iloc[:, :-1].values
             y_test = test_data.iloc[:, -1].values
 
@@ -152,13 +177,12 @@ def evaluate():
             y_pred = (model.predict(X_test) > 0.5).astype(int)
             
             # Classification report
-            report = classification_report(y_test, y_pred, output_dict=True)
-            confusion = confusion_matrix(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True, zero_division=1)
             
             # Prepare data for rendering
             classification_report_data = []
             for label, metrics in report.items():
-                if label != 'accuracy' and label != 'weighted avg':  # Exclude 'weighted avg' from the main report
+                if label != 'accuracy' and label != 'weighted avg':
                     classification_report_data.append({
                         'label': label,
                         'precision': f"{metrics['precision']:.2f}",
@@ -166,6 +190,7 @@ def evaluate():
                         'f1_score': f"{metrics['f1-score']:.2f}",
                         'support': metrics['support']
                     })
+
             weighted_avg = report.get('weighted avg', {})
             weighted_avg = {
                 'precision': f"{weighted_avg.get('precision', 0):.2f}",
@@ -173,6 +198,7 @@ def evaluate():
                 'f1_score': f"{weighted_avg.get('f1-score', 0):.2f}",
                 'support': weighted_avg.get('support', 0)
             }
+
             confusion_matrix_data = []
             for index, (true_label, pred_label) in enumerate(zip(y_test, y_pred.flatten())):
                 result = 'Correctly Classified' if true_label == pred_label else 'Incorrectly Classified'
@@ -191,7 +217,7 @@ def evaluate():
                                    weighted_avg=weighted_avg,
                                    confusion_matrix=confusion_matrix_data)
         except Exception as e:
-            print(f"Error processing files: {e}")  # Debugging line
+            print(f"Error processing files: {e}")
             return render_template('index.html', test_error=f"Error processing files: {e}")
 
     return redirect(url_for('index'))
