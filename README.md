@@ -9,7 +9,7 @@ Train, test, and generate descriptors from datasets using TensorFlow. Descriptor
 
 ## Usage
 
-Website Link: [https://curescience-tensorflow.onrender.com/tensorflow][https://curescience-tensorflow.onrender.com/tensorflow)
+Website Link: [Link][https://curescience-tensorflow.onrender.com/tensorflow)
 
 ## Directory Structure
 ```
